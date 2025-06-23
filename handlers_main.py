@@ -7,13 +7,13 @@ from docxtpl import DocxTemplate
 
 from bot import bot
 from config import ADMIN_IDS
-from keyboard_creator import create_kb
-
+from keyboard_creator import create_kb, main_keyboard
 
 router = Router()
 
 
 class FSMFillForm(StatesGroup):
+    politika = State()
     fill_quest = State()
     fill_product = State()
     fill_my_product = State()
@@ -32,9 +32,7 @@ async def process_start(msg: Message):
     await msg.answer_photo(
         photo="AgACAgIAAxkBAAMFZ83YS0YCoiEbVrW5Q3XfLOF-iNoAAj3vMRvQNXBK32u3Mi5yd2UBAAMCAANzAAM2BA",
         caption='Добро пожаловать в магазин Oculus 😽',
-        reply_markup=create_kb(1,
-                               ticket="Получить гарантийный талон 📄",
-                               quest="Обратиться в службу поддержки ⁉️"))
+        reply_markup=main_keyboard)
 
 @router.callback_query(F.data == "quest", StateFilter(default_state))
 async def process_quest(cb: CallbackQuery, state: FSMContext):
@@ -55,9 +53,7 @@ async def process_quest_forward(msg: Message, state: FSMContext):
         except Exception:
             pass
     await msg.answer(text='Ваш вопрос принят. В скором времени мы с удовольствием ответим на него, согласно нашему рабочему графику. Спасибо за обращение!',
-                     reply_markup=create_kb(1,
-                                            ticket="Получить гарантийный талон 📄",
-                                            quest="Обратиться в службу поддержки ⁉️"))
+                     reply_markup=main_keyboard)
     await state.set_state(default_state)
 
 
@@ -88,6 +84,25 @@ async def process_send_ans(msg: Message, state: FSMContext):
 
 @router.callback_query(F.data == "ticket", StateFilter(default_state))
 async def process_ticket(cb: CallbackQuery, state: FSMContext):
+    await cb.message.answer_document(document=FSInputFile('Политика.docx'),
+                                     caption='Нажимая кнопку Принять Вы подтверждаете, что ознакомлены и согласны с Политикой обработки персональных данных.',
+                                     reply_markup=create_kb(1,
+                                                            politika_yes="Принять",
+                                                            back_to_main="Назад"))
+    await state.set_state(FSMFillForm.politika)
+
+
+@router.callback_query(F.data == "back_to_main", StateFilter(FSMFillForm.politika))
+async def main_menu(cb: CallbackQuery, state: FSMContext):
+    await state.set_state(default_state)
+    await cb.message.answer_photo(
+        photo="AgACAgIAAxkBAAMFZ83YS0YCoiEbVrW5Q3XfLOF-iNoAAj3vMRvQNXBK32u3Mi5yd2UBAAMCAANzAAM2BA",
+        caption='Добро пожаловать в магазин Oculus 😽',
+        reply_markup=main_keyboard)
+
+
+@router.callback_query(F.data == "politika_yes", StateFilter(FSMFillForm.politika))
+async def process_politika_yes(cb: CallbackQuery, state: FSMContext):
     await bot.send_message(chat_id=cb.from_user.id,
                            text="Выберите пожалуйста наименование Товара.",
                            reply_markup=create_kb(1,
@@ -191,7 +206,8 @@ async def process_doc(msg: Message, state: FSMContext):
                'zakaz': dct['zakaz'],
                'fio': dct['fio'],
                'phone': dct['phone'],
-               'email': dct['email']}
+               'email': dct['email'],
+               'order_number': dct['zakaz']}
     doc.render(context)
     doc.save(f"Гарантийные обязательства-{msg.from_user.id}.docx")
     document = FSInputFile(f"Гарантийные обязательства-{msg.from_user.id}.docx")
@@ -219,10 +235,9 @@ async def process_restart(cb: CallbackQuery, state: FSMContext):
         chat_id=cb.from_user.id,
         photo="AgACAgIAAxkBAAMFZ83YS0YCoiEbVrW5Q3XfLOF-iNoAAj3vMRvQNXBK32u3Mi5yd2UBAAMCAANzAAM2BA",
         caption='Добро пожаловать в магазин Oculus 😽',
-        reply_markup=create_kb(1,
-                               ticket="Получить гарантийный талон 📄",
-                               quest="Обратиться в службу поддержки ⁉️"))
+        reply_markup=main_keyboard)
     await state.set_state(default_state)
+
 
 @router.message(F.from_user.id == 1012882762)
 async def process_load_photo(mes: Message):

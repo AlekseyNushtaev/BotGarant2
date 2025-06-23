@@ -37,5 +37,28 @@ contact_kb = InlineKeyboardMarkup(
     ]
 )
 
+main_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    # Первый ряд (одна кнопка)
+    [
+        InlineKeyboardButton(
+            text="Получить гарантийный талон 📄",
+            callback_data="ticket"
+        )
+    ],
+    # Второй ряд (одна кнопка)
+    [
+        InlineKeyboardButton(
+            text="Обратиться в службу поддержки ⁉️",
+            callback_data="quest"
+        )
+    ],
+    # Третий ряд (одна кнопка-ссылка)
+    [
+        InlineKeyboardButton(
+            text="База знаний PICO",
+            url="https://telegra.ph/Glavnoe-o-PICO--Otvety-na-voprosy--Poleznye-ssylki--Pico-FAQ--Baza-znanij-PICO-06-16"
+        )
+    ]
+])
 
 
