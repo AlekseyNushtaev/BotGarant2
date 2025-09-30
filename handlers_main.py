@@ -31,7 +31,7 @@ class FSMFillForm(StatesGroup):
 async def process_start(msg: Message):
     await msg.answer_photo(
         photo="AgACAgIAAxkBAAMFZ83YS0YCoiEbVrW5Q3XfLOF-iNoAAj3vMRvQNXBK32u3Mi5yd2UBAAMCAANzAAM2BA",
-        caption='Добро пожаловать в магазин Oculus 😽',
+        caption='Добро пожаловать в магазин VION 😽',
         reply_markup=main_keyboard)
 
 @router.callback_query(F.data == "quest", StateFilter(default_state))
@@ -234,7 +234,7 @@ async def process_restart(cb: CallbackQuery, state: FSMContext):
     await cb.bot.send_photo(
         chat_id=cb.from_user.id,
         photo="AgACAgIAAxkBAAMFZ83YS0YCoiEbVrW5Q3XfLOF-iNoAAj3vMRvQNXBK32u3Mi5yd2UBAAMCAANzAAM2BA",
-        caption='Добро пожаловать в магазин Oculus 😽',
+        caption='Добро пожаловать в магазин VION 😽',
         reply_markup=main_keyboard)
     await state.set_state(default_state)
 
